@@ -1,6 +1,6 @@
 # Extract Mongo Schema
 
-Extract schema from Mongo database, including foreign keys.
+Extract (and visualize) schema from Mongo database, including foreign keys. Output is simple json file or html with dagre/d3.js diagram (depending on command line options).
 
 ## Instalation
 
@@ -13,21 +13,37 @@ npm -g install extract-mongo-schema
 ```sh
 
 Usage:
-	extract-mongo-schema -d connection_string -o schema.json
+	extract-mongo-schema -d connection_string -o schema.json -f json
 		-d, --database	Database connection string. Example: "mongodb://localhost:3001/meteor".
 		-o, --output	Output file
+		-f, --format	Output file format. Can be "json" or "html-diagram". Default is "json".
 
 ```
 
 
 ## Example usage
 
+**Extract schema into json**
+
 ```
 extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.json
 ```
 
 
-## Example output
+**Extract schema into html**
+
+```
+extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.html -f html-diagram
+```
+
+Open html in your browser and you'll see rendered ER diagram.
+
+## Example output .html (screenshot)
+
+![Alt text](/preview.png?raw=true "Preview")
+
+
+## Example output .json
 
 **schema.json**
 

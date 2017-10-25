@@ -8,7 +8,8 @@ const extractMongoSchema = require("./extract-mongo-schema");
 
 const optionDefinitions = [
   { name: "database", alias: "d", type: String },
-  { name: "output", alias: "o", type: String }
+  { name: "output", alias: "o", type: String },
+  { name: "format", alias: "f", type: String }
 ];
 
 const args = commandLineArgs(optionDefinitions);
@@ -22,6 +23,7 @@ var printUsage = function() {
 	console.log("\textract-mongo-schema -d connection_string -o schema.json");
 	console.log("\t\t-d, --database\tDatabase connection string. Example: \"mongodb://localhost:3001/meteor\".");
 	console.log("\t\t-o, --output\tOutput file");
+	console.log("\t\t-f, --format\tOutput file format. Can be \"json\" or \"html-diagram\".");
 	console.log("");
 	console.log("Enjoy! (and expect bugs)");
 	console.log("");
@@ -48,6 +50,8 @@ if(fs.existsSync(args.output)) {
 	}
 }
 
+var outputFormat = args.format || "json";
+
 console.log("");
 console.log("Extracting...");
 extractMongoSchema.extractMongoSchema(args.database, function(err, schema) {
@@ -55,12 +59,38 @@ extractMongoSchema.extractMongoSchema(args.database, function(err, schema) {
 		console.log(err);
 		process.exit(1);
 	}
-	try {
-		fs.writeFileSync(args.output, JSON.stringify(schema, null, "\t"), "utf8");
-	} catch(e) {
-		console.log("Error: cannot write output \"" + args.output + "\". " + e.message);
-		process.exit(1);
+
+	if(outputFormat === "json") {
+		try {
+			fs.writeFileSync(args.output, JSON.stringify(schema, null, "\t"), "utf8");
+		} catch(e) {
+			console.log("Error: cannot write output \"" + args.output + "\". " + e.message);
+			process.exit(1);
+		}
 	}
+
+	if(outputFormat === "html-diagram") {
+		var templateFileName = path.join(__dirname, "/template-html-diagram.html");
+
+		// read input file
+		var templateHTML = "";
+		try {
+			templateHTML = fs.readFileSync(templateFileName, "utf8");
+		} catch(e) {
+			console.log("Error: cannot read template file \"" + templateFileName + "\". " + e.message);
+			process.exit(1);
+		}
+
+		templateHTML = templateHTML.replace("{/*DATA_HERE*/}", JSON.stringify(schema, null, "\t"));
+
+		try {
+			fs.writeFileSync(args.output, templateHTML, "utf8");
+		} catch(e) {
+			console.log("Error: cannot write output \"" + args.output + "\". " + e.message);
+			process.exit(1);
+		}
+	}
+
 
 	console.log("Success.");
 	console.log("");

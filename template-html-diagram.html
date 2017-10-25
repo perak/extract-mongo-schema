@@ -1,0 +1,171 @@
+<!doctype html>
+<head>
+	<title>ERM</title>
+
+	<style>
+		div.container {
+		  /*font-family: "Courier New", Courier, monospace;*/
+		  font-family: "Helvetic Neue", Helvetica, Arial, sans-serif;
+		  font-size: small;
+		}
+
+		.node rect,
+		.node circle,
+		.node ellipse {
+		  stroke: #333;
+		  opacity: 0.8;
+		  fill-opacity: 0;
+		}
+
+		.edgePath path {
+		  stroke: #333;
+		  fill: #333;
+		  fill-opacity: 1;
+		  stroke-opacity: 1;
+		}
+
+		.cluster {
+		  stroke: #999;
+		  /*fill: #222;*/
+		  fill-opacity: 0;
+		  stroke-opacity: 0.6;
+		}
+
+		.entity-name rect {
+		  fill: #222;
+		  fill-opacity: 0.3;
+		}
+	</style>
+</head>
+<body>
+  <div class="background"></div>
+  <div class="container">
+    <svg></svg>
+  </div>
+
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.4.17/dagre-d3.min.js"></script>
+
+  <script>
+	var drawERM = function(data) {
+		var width = window.innerWidth, 
+		initialHeight = window.innerHeight, 
+		svg = d3.select("body div.container svg"),
+		inner = svg.append("g");
+
+		svg.attr('width', width).attr('height', initialHeight);
+
+		var resizeGraph = function(doCenter) {
+			var newWidth = window.innerWidth; 
+			var newHeight = window.innerHeight;
+
+			if(newWidth < g.graph().width + 40) {
+				newWidth = g.graph().width + 40;
+			}
+			if(newHeight < g.graph().height + 40) {
+				newHeight = g.graph().height + 40;
+			}
+			svg.attr('width', newWidth).attr('height', newHeight);
+
+			// Center the graph
+			if(doCenter) {
+				zoom
+				  .translate([(svg.attr("width") - g.graph().width * initialScale) / 2, 20])
+				  .scale(initialScale)
+				  .event(svg);
+			}
+		}
+
+		// Set up zoom support
+		var zoom = d3.behavior.zoom().on("zoom", function() {
+		  inner.attr("transform", "translate(" + d3.event.translate + ")" +
+		    "scale(" + d3.event.scale + ")");
+		});
+		svg.call(zoom);
+
+		// create graph
+		var g = new dagreD3.graphlib.Graph({
+		  multigraph: false,
+		  compound: true
+		}).setGraph({
+		  rankdir: "LR",
+		  edgesep: 25,
+		  nodesep: 0
+		});
+
+		var links = [];
+
+		var addField = function(collectionName, fieldName, fieldInfo, parentFieldName) {
+			var nodeName = parentFieldName ? collectionName + "_" + parentFieldName + "_" + fieldName : collectionName + "_" + fieldName;
+			g.setNode(nodeName, {
+			  label: (parentFieldName ? parentFieldName + "." + fieldName : fieldName) + ": " + fieldInfo.type,
+			  width: 300
+			});
+			g.setParent(nodeName, collectionName + "_container");
+
+			if(fieldInfo.foreignKey && fieldInfo.references) {
+				links.push({
+					from: nodeName,
+					to: fieldInfo.references + "__id"
+				});			
+			}
+
+			if(fieldInfo.type == "Object" && fieldInfo.structure) {
+				for(var subFieldName in fieldInfo.structure) {
+					addField(collectionName, subFieldName, fieldInfo.structure[subFieldName], parentFieldName ? parentFieldName + "." + fieldName : fieldName);
+				}
+			}
+		};
+
+		var addCollection = function(collectionName, collectionInfo) {
+			g.setNode(collectionName + "_container", {
+			  label: ""
+			});
+			g.setNode(collectionName + "_title", {
+			  label: collectionName,
+			  class: 'entity-name',
+			  labelStyle: 'font-weight:bold;',
+			  width: 300
+			});
+
+			g.setParent(collectionName + "_title", collectionName + "_container");
+
+			for(var fieldName in collectionInfo) {
+				addField(collectionName, fieldName, collectionInfo[fieldName]);
+			}
+		};
+
+		for(var collectionName in data) {
+			addCollection(collectionName, data[collectionName]);
+		}
+
+		links.map(function(link) {
+			g.setEdge(link.from, link.to, {
+			  label: '',
+			  lineInterpolate: 'monotone'
+			});
+		});
+
+		// Create the renderer
+		var render = dagreD3.render();
+
+		// Run the renderer. This is what draws the final graph.
+		render(inner, g);
+
+		// adjust height
+		var initialScale = 1; //0.75;
+
+		window.addEventListener('resize', function () {
+			resizeGraph();
+		});
+
+		resizeGraph(true);
+
+  	};
+
+  	var data = {/*DATA_HERE*/};
+
+  	drawERM(data);
+
+  </script>
+</body>
