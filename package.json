@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^2.2.33"
+    "fibers": "^2.0.0",
+    "mongodb": "^2.2.33",
+    "wait.for": "^0.6.6"
   }
 }
