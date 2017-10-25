@@ -11,8 +11,6 @@ npm -g install extract-mongo-schema
 ## Usage
 
 ```sh
-Extract schema from Mongo database (including foreign keys)
-Database connection string is missing.
 
 Usage:
 	extract-mongo-schema -d connection_string -o schema.json
