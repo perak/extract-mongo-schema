@@ -1,16 +1,33 @@
 {
-  "name": "extract-schema",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "extract-mongo-schema",
+  "version": "0.1.0",
+  "description": "Extract schema from Mongo database (including foreign keys)",
+  "main": "extract-mongo-schema.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/perak/extract-mongo-schema.git"
+  },
+  "keywords": [
+    "mongo",
+    "schema",
+    "data model",
+    "foreign keys"
+  ],
+  "preferGlobal": "true",
+  "bin": {
+    "extract-mongo-schema": "cli.js"
+  },
+  "author": "Petar Korponaić <petar.korponaic@gmail.com>",
+  "license": "MIT",
   "dependencies": {
-    "fibers": "^2.0.0",
+    "command-line-args": "^3.0.5",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "replace-ext": "^1.0.0",
     "mongodb": "^2.2.33",
-    "wait.for": "^0.6.6"
+    "wait.for": "^0.6.6"  
   }
 }

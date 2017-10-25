@@ -1,10 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var wait = require("wait.for");
 
-// Connection URL
-var url = 'mongodb://localhost:3001/meteor';
-
-var getSchema = function() {
+var getSchema = function(url) {
 	var db = wait.forMethod(MongoClient, "connect", url);
 
 	var l = db.listCollections();
@@ -122,15 +119,33 @@ var getSchema = function() {
 };
 
 
-var printSchema = function() {
+var printSchema = function(url, cb) {
 	var schema = null;
 	try {
-		var schema = getSchema();
+		var schema = getSchema(url);
 	} catch(err) {
-		console.log(err);
+		if(cb) {
+			cb(err, null);
+		} else {
+			console.log(err);
+		}
 		return;	
 	}
-	console.log(JSON.stringify(schema, null, 4));
+
+	if(cb) {
+		cb(null, schema);
+	}
+
+	return schema;
 };
 
-wait.launchFiber(printSchema);
+var extractMongoSchema = function(url, cb) {
+	wait.launchFiber(printSchema, url, cb);
+};
+
+
+if(typeof module != "undefined" && module.exports) {
+  module.exports.extractMongoSchema = extractMongoSchema;
+} else {
+	this.extractMongoSchema = extractMongoSchema;
+}
