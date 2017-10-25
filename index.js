@@ -6,7 +6,6 @@ var url = 'mongodb://localhost:3001/meteor';
 
 var getSchema = function() {
 	var db = wait.forMethod(MongoClient, "connect", url);
-	console.log("Connected successfully to server");
 
 	var l = db.listCollections();
 	var collectionInfos = wait.forMethod(l, "toArray");
@@ -39,6 +38,9 @@ var getSchema = function() {
 				typeName = Object.prototype.toString.call(doc[key]);
 			}
 
+			typeName = typeName.replace("[object ", "");
+			typeName = typeName.replace("]", "");
+
 			if(!docSchema[key]["types"][typeName]) {
 				docSchema[key]["types"][typeName] = { frequency: 0 };
 			}
@@ -49,11 +51,13 @@ var getSchema = function() {
 				if(key == "_id") {
 					docSchema[key]["primaryKey"] = true;
 				} else {
-					findRelatedCollection(doc[key], docSchema[key]);
+					if(!docSchema[key]["foreignKey"]) {
+						findRelatedCollection(doc[key], docSchema[key]);
+					}
 				}
 			}
 
-			if(typeName == "[object Object]") {
+			if(typeName == "Object") {
 				docSchema[key]["types"][typeName]["structure"] = {};
 				getDocSchema(doc[key], docSchema[key]["types"][typeName]["structure"]);
 			}
@@ -67,13 +71,13 @@ var getSchema = function() {
 					var max = 0;
 					var notNull = true;
 					for(var typeName in docSchema[fieldName]["types"]) {
-						if(typeName == "[object Null]") {
+						if(typeName == "Null") {
 							notNull = false;									
 						}
 						docSchema[fieldName]["types"][typeName]["frequency"] = docSchema[fieldName]["types"][typeName]["frequency"] / processed;
 						if(docSchema[fieldName]["types"][typeName]["frequency"] > max) {
 							max = docSchema[fieldName]["types"][typeName]["frequency"];
-							if(typeName != "undefined" && typeName != "[object Null]") {
+							if(typeName != "undefined" && typeName != "Null") {
 								docSchema[fieldName]["type"] = typeName;
 							}
 						}
@@ -84,7 +88,7 @@ var getSchema = function() {
 					}
 
 					var dataType = docSchema[fieldName]["type"];
-					if(dataType == "[object Object]") {
+					if(dataType == "Object") {
 						mostFrequentType(docSchema[fieldName]["types"][dataType]["structure"], processed);
 						docSchema[fieldName]["structure"] = docSchema[fieldName]["types"][dataType]["structure"];
 					}
@@ -118,9 +122,15 @@ var getSchema = function() {
 };
 
 
-var x = function() {
-	var schema = getSchema();
+var printSchema = function() {
+	var schema = null;
+	try {
+		var schema = getSchema();
+	} catch(err) {
+		console.log(err);
+		return;	
+	}
 	console.log(JSON.stringify(schema, null, 4));
 };
 
-wait.launchFiber(x);
+wait.launchFiber(printSchema);
