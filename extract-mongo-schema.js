@@ -16,6 +16,7 @@ var getSchema = function(url) {
 
 			var related = wait.forMethod(collections[collectionName].collection, "findOne", { _id: value });
 			if(related) {
+				delete field["key"];
 				field["foreignKey"] = true;
 				field["references"] = collectionName;
 			} else {
@@ -28,6 +29,10 @@ var getSchema = function(url) {
 		for(var key in doc) {
 			if(!docSchema[key]) {
 				docSchema[key] = { "types": {} };
+			}
+
+			if(!docSchema[key]["types"]) {
+				docSchema[key]["types"] = {};
 			}
 
 			var typeName = typeof doc[key];

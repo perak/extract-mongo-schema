@@ -25,17 +25,19 @@ var printUsage = function() {
 	console.log("\t\t-o, --output\tOutput file");
 	console.log("\t\t-f, --format\tOutput file format. Can be \"json\" or \"html-diagram\".");
 	console.log("");
-	console.log("Enjoy! (and expect bugs)");
+	console.log("Enjoy! :)");
 	console.log("");
 };
 
 if(!args.database) {
+	console.log("");
 	console.log("Database connection string is missing.");
 	printUsage();
 	process.exit(1);
 }
 
 if(!args.output) {
+	console.log("");
 	console.log("Output path is missing.");
 	printUsage();
 	process.exit(1);
