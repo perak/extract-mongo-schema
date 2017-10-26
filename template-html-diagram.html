@@ -101,7 +101,7 @@
 			  label: (parentFieldName ? parentFieldName + "." + fieldName : fieldName) + ": " + fieldInfo.type,
 			  width: 300
 			});
-			g.setParent(nodeName, collectionName + "_container");
+			g.setParent(nodeName, "___" + collectionName + "_container");
 
 			if(fieldInfo.foreignKey && fieldInfo.references) {
 				links.push({
@@ -118,17 +118,17 @@
 		};
 
 		var addCollection = function(collectionName, collectionInfo) {
-			g.setNode(collectionName + "_container", {
+			g.setNode("___" + collectionName + "_container", {
 			  label: ""
 			});
-			g.setNode(collectionName + "_title", {
+			g.setNode("___" + collectionName + "_title", {
 			  label: collectionName,
 			  class: 'entity-name',
 			  labelStyle: 'font-weight:bold;',
 			  width: 300
 			});
 
-			g.setParent(collectionName + "_title", collectionName + "_container");
+			g.setParent("___" + collectionName + "_title", "___" + collectionName + "_container");
 
 			for(var fieldName in collectionInfo) {
 				addField(collectionName, fieldName, collectionInfo[fieldName]);
