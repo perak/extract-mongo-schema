@@ -6,14 +6,11 @@ var getSchema = function(url) {
 
 	var l = db.listCollections();
 	var collectionInfos = wait.forMethod(l, "toArray");
-
 	var schema = {};
 	var collections = {};
 
 	var findRelatedCollection = function(value, field) {
-
 		for(var collectionName in collections) {
-
 			var related = wait.forMethod(collections[collectionName].collection, "findOne", { _id: value });
 			if(related) {
 				delete field["key"];
@@ -48,12 +45,11 @@ var getSchema = function(url) {
 			}
 			docSchema[key]["types"][typeName]["frequency"]++;
 
-
 			if(typeName == "string" && /^[23456789ABCDEFGHJKLMNPQRSTWXYZabcdefghijkmnopqrstuvwxyz]{17}$/.test(doc[key])) {
 				if(key == "_id") {
 					docSchema[key]["primaryKey"] = true;
 				} else {
-					if(!docSchema[key]["foreignKey"]) {
+					if(!docSchema[key]["foreignKey"] || !docSchema[key]["references"]) {
 						findRelatedCollection(doc[key], docSchema[key]);
 					}
 				}
@@ -103,13 +99,15 @@ var getSchema = function(url) {
 	};
 
 	collectionInfos.map(function(collectionInfo, index) {
-		var docSchema = {};
-		schema[collectionInfo.name] = docSchema;
-
 		var collectionData = {};
 		collections[collectionInfo.name] = collectionData;
 		collectionData["collection"] = db.collection(collectionInfo.name);
+	});
 
+	collectionInfos.map(function(collectionInfo, index) {
+		collectionData = collections[collectionInfo.name];
+		var docSchema = {};
+		schema[collectionInfo.name] = docSchema;
 		var cur = wait.forMethod(collectionData["collection"], "find", {}, { limit: 100 });
 		var docs = wait.forMethod(cur, "toArray");
 		docs.map(function(doc) {
