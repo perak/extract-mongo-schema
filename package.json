@@ -1,0 +1,68 @@
+{
+  "_from": "extract-mongo-schema",
+  "_id": "extract-mongo-schema@0.2.5",
+  "_inBundle": false,
+  "_integrity": "sha1-b22rQMFh7pAJxgWzlI8cBx65A2A=",
+  "_location": "/extract-mongo-schema",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "extract-mongo-schema",
+    "name": "extract-mongo-schema",
+    "escapedName": "extract-mongo-schema",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/extract-mongo-schema/-/extract-mongo-schema-0.2.5.tgz",
+  "_shasum": "6f6dab40c161ee9009c605b3948f1c071eb90360",
+  "_spec": "extract-mongo-schema",
+  "_where": "/data",
+  "author": {
+    "name": "Petar Korponaić",
+    "email": "petar.korponaic@gmail.com"
+  },
+  "bin": {
+    "extract-mongo-schema": "cli.js"
+  },
+  "bugs": {
+    "url": "https://github.com/perak/extract-mongo-schema/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "command-line-args": "^3.0.5",
+    "fs": "0.0.1-security",
+    "mongodb": "^2.2.33",
+    "path": "^0.12.7",
+    "replace-ext": "^1.0.0",
+    "wait.for": "^0.6.6"
+  },
+  "deprecated": false,
+  "description": "Extract (and visualize) schema from Mongo database (including foreign keys)",
+  "homepage": "https://github.com/perak/extract-mongo-schema#readme",
+  "keywords": [
+    "mongodb",
+    "mongo",
+    "schema",
+    "data model",
+    "foreign keys",
+    "erm",
+    "er diagram"
+  ],
+  "license": "MIT",
+  "main": "extract-mongo-schema.js",
+  "name": "extract-mongo-schema",
+  "preferGlobal": "true",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perak/extract-mongo-schema.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.2.5"
+}
