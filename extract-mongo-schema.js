@@ -1,7 +1,7 @@
-var MongoClient = require('mongodb').MongoClient;
+var MongoClient = require("mongodb").MongoClient;
 var wait = require("wait.for");
 
-var getSchema = function(url) {
+var getSchema = function(url, opts) {
 	var db = wait.forMethod(MongoClient, "connect", url);
 
 	var l = db.listCollections();
@@ -22,7 +22,7 @@ var getSchema = function(url) {
 		}
 	};
 
-	var getDocSchema = function(doc, docSchema) {
+	var getDocSchema = function(collectionName, doc, docSchema) {
 		for(var key in doc) {
 			if(!docSchema[key]) {
 				docSchema[key] = { "types": {} };
@@ -49,15 +49,19 @@ var getSchema = function(url) {
 				if(key == "_id") {
 					docSchema[key]["primaryKey"] = true;
 				} else {
+					// only if is not already processes
 					if(!docSchema[key]["foreignKey"] || !docSchema[key]["references"]) {
-						findRelatedCollection(doc[key], docSchema[key]);
+						// only if is not ignored
+						if(!(opts.dontFollowFK["__ANY__"][key] || (opts.dontFollowFK[collectionName] && opts.dontFollowFK[collectionName][key]))) {
+							findRelatedCollection(doc[key], docSchema[key]);
+						}
 					}
 				}
 			}
 
 			if(typeName == "Object") {
 				docSchema[key]["types"][typeName]["structure"] = {};
-				getDocSchema(doc[key], docSchema[key]["types"][typeName]["structure"]);
+				getDocSchema(collectionName, doc[key], docSchema[key]["types"][typeName]["structure"]);
 			}
 		}
 	};
@@ -111,7 +115,7 @@ var getSchema = function(url) {
 		var cur = wait.forMethod(collectionData["collection"], "find", {}, { limit: 100 });
 		var docs = wait.forMethod(cur, "toArray");
 		docs.map(function(doc) {
-			getDocSchema(doc, docSchema);
+			getDocSchema(collectionInfo.name, doc, docSchema);
 		});
 
 		mostFrequentType(docSchema, docs.length);
@@ -122,10 +126,10 @@ var getSchema = function(url) {
 };
 
 
-var printSchema = function(url, cb) {
+var printSchema = function(url, opts, cb) {
 	var schema = null;
 	try {
-		var schema = getSchema(url);
+		var schema = getSchema(url, opts);
 	} catch(err) {
 		if(cb) {
 			cb(err, null);
@@ -142,8 +146,8 @@ var printSchema = function(url, cb) {
 	return schema;
 };
 
-var extractMongoSchema = function(url, cb) {
-	wait.launchFiber(printSchema, url, cb);
+var extractMongoSchema = function(url, opts, cb) {
+	wait.launchFiber(printSchema, url, opts, cb);
 };
 
 

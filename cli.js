@@ -9,7 +9,8 @@ const extractMongoSchema = require("./extract-mongo-schema");
 const optionDefinitions = [
   { name: "database", alias: "d", type: String },
   { name: "output", alias: "o", type: String },
-  { name: "format", alias: "f", type: String }
+  { name: "format", alias: "f", type: String },
+  { name: "dont-follow-fk", alias: "n", multiple: true, type: String }
 ];
 
 const args = commandLineArgs(optionDefinitions);
@@ -21,9 +22,10 @@ var printUsage = function() {
 	console.log("");
 	console.log("Usage:");
 	console.log("\textract-mongo-schema -d connection_string -o schema.json");
-	console.log("\t\t-d, --database\tDatabase connection string. Example: \"mongodb://localhost:3001/meteor\".");
-	console.log("\t\t-o, --output\tOutput file");
-	console.log("\t\t-f, --format\tOutput file format. Can be \"json\" or \"html-diagram\".");
+	console.log("\t\t-d, --database string\tDatabase connection string. Example: \"mongodb://localhost:3001/meteor\".");
+	console.log("\t\t-o, --output string\tOutput file");
+	console.log("\t\t-f, --format string\tOutput file format. Can be \"json\" or \"html-diagram\".");
+	console.log("\t\t-n, --dont-follow-fk string\tDon't follow specified foreign key. Can be simply \"fieldName\" (all collections) or \"collectionName:fieldName\" (only for given collection).");
 	console.log("");
 	console.log("Enjoy! :)");
 	console.log("");
@@ -54,9 +56,36 @@ if(fs.existsSync(args.output)) {
 
 var outputFormat = args.format || "json";
 
+var dontFollowTMP = args["dont-follow-fk"] || [];
+
+var dontFollowFK = { 
+	__ANY__: {}
+};
+
+dontFollowTMP.map(function(df) {
+	var dfArray = df.split(":");
+
+	var collection = "";
+	var field = "";
+
+	if(dfArray.length > 1) {
+		collection = dfArray[0];
+		field = dfArray[1];
+	} else {
+		collection = "__ANY__";
+		field = dfArray[0];
+	}
+	dontFollowFK[collection][field] = true;
+});
+
 console.log("");
 console.log("Extracting...");
-extractMongoSchema.extractMongoSchema(args.database, function(err, schema) {
+
+var opts = {
+	dontFollowFK: dontFollowFK
+};
+
+extractMongoSchema.extractMongoSchema(args.database, opts, function(err, schema) {
 	if(err) {
 		console.log(err);
 		process.exit(1);

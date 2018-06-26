@@ -1,6 +1,6 @@
 {
   "name": "extract-mongo-schema",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Extract (and visualize) schema from Mongo database (including foreign keys)",
   "main": "extract-mongo-schema.js",
   "scripts": {
@@ -31,6 +31,6 @@
     "path": "^0.12.7",
     "replace-ext": "^1.0.0",
     "mongodb": "^2.2.33",
-    "wait.for": "^0.6.6"  
+    "wait.for": "^0.6.6"
   }
 }

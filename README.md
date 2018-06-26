@@ -14,9 +14,10 @@ npm -g install extract-mongo-schema
 
 Usage:
 	extract-mongo-schema -d connection_string -o schema.json -f json
-		-d, --database	Database connection string. Example: "mongodb://localhost:3001/meteor".
-		-o, --output	Output file
-		-f, --format	Output file format. Can be "json" or "html-diagram". Default is "json".
+		-d, --database			Database connection string. Example: "mongodb://localhost:3001/meteor".
+		-o, --output			Output file
+		-f, --format			Output file format. Can be "json" or "html-diagram". Default is "json".
+		-n, --dont-follow-fk 	Don't follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).
 
 ```
 
@@ -37,6 +38,19 @@ extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.html -f html
 ```
 
 Open html in your browser and you'll see rendered ER diagram.
+
+
+**Ignore some foreign keys**
+
+Use `-n` switch to prevent detecting and drawing links for specified fields. You can specify simply `fieldName` (that applies to all collections) or `collectionName:fieldName` (foreign key is ignored only in given collection).
+
+Example:
+
+```
+extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.html -f html-diagram -n createdBy -n users:modifiedBy
+```
+*(in this example: any foreign key named "createdBy" will be ignored. Also "modifiedBy" but only in users collection)*
+
 
 ## Example output .html (screenshot)
 
