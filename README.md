@@ -2,7 +2,7 @@
 
 Extract (and visualize) schema from Mongo database, including foreign keys. Output is simple json file or html with dagre/d3.js diagram (depending on command line options).
 
-## Instalation
+## Installation
 
 ```sh
 npm -g install extract-mongo-schema
@@ -17,6 +17,9 @@ Usage:
 		-d, --database			Database connection string. Example: "mongodb://localhost:3001/meteor".
 		-o, --output			Output file
 		-f, --format			Output file format. Can be "json" or "html-diagram". Default is "json".
+		-c, --collection        Comma separated list of collections to analyze. Example: "collection1,collection2".
+		-a, --array                Comma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".
+		-r, --raw                Shows the exact list of types with frequency instead of the most frequent type only.
 		-n, --dont-follow-fk 	Don't follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).
 
 ```
@@ -35,6 +38,12 @@ extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.json
 
 ```
 extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.html -f html-diagram
+```
+
+**Extract specific collections in raw format and analyze Array items**
+
+```
+extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.json -c "collection1,collection2,collection3" -a "Array" -r
 ```
 
 Open html in your browser and you'll see rendered ER diagram.
