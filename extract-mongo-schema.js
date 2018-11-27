@@ -22,6 +22,16 @@ var getSchema = function(url, opts) {
 		}
 	};
 
+	var setTypeName = function(item) {
+               var typeName = typeof item;
+               if(typeName === "object") {
+                       typeName = Object.prototype.toString.call(item);
+               }
+               typeName = typeName.replace("[object ", "");
+               typeName = typeName.replace("]", "");
+               return typeName;
+       };
+	
 	var getDocSchema = function(collectionName, doc, docSchema) {
 		for(var key in doc) {
 			if(!docSchema[key]) {
@@ -32,13 +42,7 @@ var getSchema = function(url, opts) {
 				docSchema[key]["types"] = {};
 			}
 
-			var typeName = typeof doc[key];
-			if(typeName === "object") {
-				typeName = Object.prototype.toString.call(doc[key]);
-			}
-
-			typeName = typeName.replace("[object ", "");
-			typeName = typeName.replace("]", "");
+			var typeName = setTypeName(doc[key]);
 
 			if(!docSchema[key]["types"][typeName]) {
 				docSchema[key]["types"][typeName] = { frequency: 0 };
@@ -63,27 +67,47 @@ var getSchema = function(url, opts) {
 				docSchema[key]["types"][typeName]["structure"] = {};
 				getDocSchema(collectionName, doc[key], docSchema[key]["types"][typeName]["structure"]);
 			}
+
+			if(opts.arrayList && opts.arrayList.indexOf(typeName) !== -1) {
+                               docSchema[key]["types"][typeName]["structure"] = {};
+                               docSchema[key]["types"][typeName]["structure"]["types"] = {}
+                               for(var i = 0; i < doc[key].length; i++) {
+                                       var typeNameArray = setTypeName(doc[key][i]);
+                                       if(typeNameArray === "Object") {
+                                               docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = {}
+                                               docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"] = {}
+                                               getDocSchema(doc[key][i], docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"]);
+                                       } else {
+                                               docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = { frequency: 1 };
+                                       }
+                               }
+                       }
 		}
 	};
+
+	var setMostFrequentType = function(field, processed) {
+               var max = 0;
+               var notNull = true;
+               for(var typeName in field["types"]) {
+                       if(typeName == "Null") {
+                               notNull = false;
+                       }
+                       field["types"][typeName]["frequency"] = field["types"][typeName]["frequency"] / processed;
+                       if(field["types"][typeName]["frequency"] > max) {
+                               max = field["types"][typeName]["frequency"];
+                               if(typeName != "undefined" && typeName != "Null") {
+                                       field["type"] = typeName;
+                               }
+                       }
+               }
+               return notNull;
+       }
 
 	var mostFrequentType = function(docSchema, processed) {
 		if(processed) {
 			for(var fieldName in docSchema) {
 				if(docSchema[fieldName]) {
-					var max = 0;
-					var notNull = true;
-					for(var typeName in docSchema[fieldName]["types"]) {
-						if(typeName == "Null") {
-							notNull = false;									
-						}
-						docSchema[fieldName]["types"][typeName]["frequency"] = docSchema[fieldName]["types"][typeName]["frequency"] / processed;
-						if(docSchema[fieldName]["types"][typeName]["frequency"] > max) {
-							max = docSchema[fieldName]["types"][typeName]["frequency"];
-							if(typeName != "undefined" && typeName != "Null") {
-								docSchema[fieldName]["type"] = typeName;
-							}
-						}
-					}
+					var notNull = setMostFrequentType(docSchema[fieldName], processed);
 					if(!docSchema[fieldName]["type"]) {
 						docSchema[fieldName]["type"] = "undefined";
 						notNull = false;
@@ -94,6 +118,19 @@ var getSchema = function(url, opts) {
 						mostFrequentType(docSchema[fieldName]["types"][dataType]["structure"], processed);
 						docSchema[fieldName]["structure"] = docSchema[fieldName]["types"][dataType]["structure"];
 					}
+
+					if(opts.arrayList && opts.arrayList.indexOf(dataType) !== -1) {
+                                               if(Object.keys(docSchema[fieldName]["types"][dataType]["structure"]["types"])[0] == "Object") {
+                                                       mostFrequentType(docSchema[fieldName]["types"][dataType]["structure"]["types"]["Object"]["structure"], processed);
+                                                       docSchema[fieldName]["types"][dataType]["structure"]["type"] = "Object";
+                                                       docSchema[fieldName]["types"][dataType]["structure"]["structure"] = docSchema[fieldName]["types"][dataType]["structure"]["types"]["Object"]["structure"];
+                                                       delete docSchema[fieldName]["types"][dataType]["structure"]["types"];
+                                               } else {
+                                                       mostFrequentType(docSchema[fieldName]["types"][dataType], processed);
+                                               }
+                                               docSchema[fieldName]["structure"] = docSchema[fieldName]["types"][dataType]["structure"];
+                                       }
+
 					delete docSchema[fieldName]["types"];
 
 					docSchema[fieldName]["required"] = notNull;
@@ -101,6 +138,14 @@ var getSchema = function(url, opts) {
 			}
 		}
 	};
+
+	if(opts.collectionList != null) {
+               for(var i = collectionInfos.length - 1; i >= 0; i--) {
+                       if(opts.collectionList.indexOf(collectionInfos[i].name) == -1) {
+                               collectionInfos.splice(i, 1);
+                       }
+               }
+       }
 
 	collectionInfos.map(function(collectionInfo, index) {
 		var collectionData = {};
@@ -117,8 +162,9 @@ var getSchema = function(url, opts) {
 		docs.map(function(doc) {
 			getDocSchema(collectionInfo.name, doc, docSchema);
 		});
-
-		mostFrequentType(docSchema, docs.length);
+		if(!opts.raw) {
+			mostFrequentType(docSchema, docs.length);
+		}
 	});
 
 	db.close();

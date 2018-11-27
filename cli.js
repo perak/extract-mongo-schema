@@ -10,6 +10,9 @@ const optionDefinitions = [
   { name: "database", alias: "d", type: String },
   { name: "output", alias: "o", type: String },
   { name: "format", alias: "f", type: String },
+  { name: "collection", alias: "c", type: String },
+  { name: "array", alias: "a", type: String },
+  { name: "raw", alias: "r", type: Boolean, defaultValue: false },
   { name: "dont-follow-fk", alias: "n", multiple: true, type: String }
 ];
 
@@ -25,6 +28,9 @@ var printUsage = function() {
 	console.log("\t\t-d, --database string\tDatabase connection string. Example: \"mongodb://localhost:3001/meteor\".");
 	console.log("\t\t-o, --output string\tOutput file");
 	console.log("\t\t-f, --format string\tOutput file format. Can be \"json\" or \"html-diagram\".");
+	console.log("\t\t-c, --collection\tComma separated list of collections to analyze. Example: \"collection1,collection2\".");
+	console.log("\t\t-a, --array\tComma separated list of types of arrays to analyze. Example: \"Uint8Array,ArrayBuffer,Array\".");
+	console.log("\t\t-r, --raw\tShows the exact list of types with frequency instead of the most frequent type only.");
 	console.log("\t\t-n, --dont-follow-fk string\tDon't follow specified foreign key. Can be simply \"fieldName\" (all collections) or \"collectionName:fieldName\" (only for given collection).");
 	console.log("");
 	console.log("Enjoy! :)");
@@ -52,6 +58,16 @@ if(fs.existsSync(args.output)) {
 		console.log("Error: output \"" + args.output + "\" is not a file.");
 		process.exit(1);
 	}
+}
+
+var collectionList = null;	
+if(args.collection) {
+	collectionList = args.collection.split(",");	
+}
+
+var arrayList = null;
+if(args.array) {
+	arrayList = args.array.split(",");
 }
 
 var outputFormat = args.format || "json";
@@ -82,6 +98,9 @@ console.log("");
 console.log("Extracting...");
 
 var opts = {
+	collectionList: collectionList,
+	arrayList:arrayList,
+	raw: args.raw,
 	dontFollowFK: dontFollowFK
 };
 
