@@ -32,6 +32,7 @@ var printUsage = function() {
 	console.log("\t\t-a, --array\tComma separated list of types of arrays to analyze. Example: \"Uint8Array,ArrayBuffer,Array\".");
 	console.log("\t\t-r, --raw\tShows the exact list of types with frequency instead of the most frequent type only.");
 	console.log("\t\t-n, --dont-follow-fk string\tDon't follow specified foreign key. Can be simply \"fieldName\" (all collections) or \"collectionName:fieldName\" (only for given collection).");
+	console.log("");
 	console.log("Enjoy! :)");
 	console.log("");
 };
