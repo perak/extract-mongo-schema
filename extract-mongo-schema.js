@@ -76,7 +76,7 @@ var getSchema = function(url, opts) {
                                        if(typeNameArray === "Object") {
                                                docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = {}
                                                docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"] = {}
-                                               getDocSchema(doc[key][i], docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"]);
+                                               getDocSchema(collectionName, doc[key][i], docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"]);
                                        } else {
                                                docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = { frequency: 1 };
                                        }
@@ -157,7 +157,7 @@ var getSchema = function(url, opts) {
 		collectionData = collections[collectionInfo.name];
 		var docSchema = {};
 		schema[collectionInfo.name] = docSchema;
-		var cur = wait.forMethod(collectionData["collection"], "find", {}, { limit: 100 });
+		var cur = wait.forMethod(collectionData["collection"], "find", {}, { limit: opts.limit });
 		var docs = wait.forMethod(cur, "toArray");
 		docs.map(function(doc) {
 			getDocSchema(collectionInfo.name, doc, docSchema);
