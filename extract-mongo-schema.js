@@ -23,14 +23,14 @@ var getSchema = function(url, opts) {
 	};
 
 	var setTypeName = function(item) {
-               var typeName = typeof item;
-               if(typeName === "object") {
-                       typeName = Object.prototype.toString.call(item);
-               }
-               typeName = typeName.replace("[object ", "");
-               typeName = typeName.replace("]", "");
-               return typeName;
-       };
+		var typeName = typeof item;
+		if(typeName === "object") {
+			typeName = Object.prototype.toString.call(item);
+		}
+		typeName = typeName.replace("[object ", "");
+		typeName = typeName.replace("]", "");
+		return typeName;
+	};
 	
 	var getDocSchema = function(collectionName, doc, docSchema) {
 		for(var key in doc) {
@@ -41,7 +41,6 @@ var getSchema = function(url, opts) {
 			if(!docSchema[key]["types"]) {
 				docSchema[key]["types"] = {};
 			}
-
 			var typeName = setTypeName(doc[key]);
 
 			if(!docSchema[key]["types"][typeName]) {
@@ -64,24 +63,39 @@ var getSchema = function(url, opts) {
 			}
 
 			if(typeName == "Object") {
-				docSchema[key]["types"][typeName]["structure"] = {};
+				if(!docSchema[key]["types"][typeName]["structure"]) {
+					docSchema[key]["types"][typeName]["structure"] = {};
+				}
 				getDocSchema(collectionName, doc[key], docSchema[key]["types"][typeName]["structure"]);
 			}
 
 			if(opts.arrayList && opts.arrayList.indexOf(typeName) !== -1) {
-                               docSchema[key]["types"][typeName]["structure"] = {};
-                               docSchema[key]["types"][typeName]["structure"]["types"] = {}
-                               for(var i = 0; i < doc[key].length; i++) {
-                                       var typeNameArray = setTypeName(doc[key][i]);
-                                       if(typeNameArray === "Object") {
-                                               docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = {}
-                                               docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"] = {}
-                                               getDocSchema(collectionName, doc[key][i], docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"]);
-                                       } else {
-                                               docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = { frequency: 1 };
-                                       }
-                               }
-                       }
+				if(!docSchema[key]["types"][typeName]["structure"]) {
+					docSchema[key]["types"][typeName]["structure"] = { "types": {} };
+				}
+
+				if(!docSchema[key]["types"][typeName]["structure"]["types"]) {
+					docSchema[key]["types"][typeName]["structure"]["types"] = {};
+				}
+				for(var i = 0; i < doc[key].length; i++) {
+					var typeNameArray = setTypeName(doc[key][i]);
+					if(typeNameArray === "Object") {
+						if(!docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]) {
+							docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = { "structure": {} };
+						}
+
+						if(!docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"]) {
+							docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"] = {};
+						}
+						getDocSchema(collectionName, doc[key][i], docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["structure"]);
+					} else {
+						if(!docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]) {
+							docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray] = { frequency: 0 };
+						}
+						docSchema[key]["types"][typeName]["structure"]["types"][typeNameArray]["frequency"]++;
+					}
+				}
+			}
 		}
 	};
 
@@ -120,16 +134,16 @@ var getSchema = function(url, opts) {
 					}
 
 					if(opts.arrayList && opts.arrayList.indexOf(dataType) !== -1) {
-                                               if(Object.keys(docSchema[fieldName]["types"][dataType]["structure"]["types"])[0] == "Object") {
-                                                       mostFrequentType(docSchema[fieldName]["types"][dataType]["structure"]["types"]["Object"]["structure"], processed);
-                                                       docSchema[fieldName]["types"][dataType]["structure"]["type"] = "Object";
-                                                       docSchema[fieldName]["types"][dataType]["structure"]["structure"] = docSchema[fieldName]["types"][dataType]["structure"]["types"]["Object"]["structure"];
-                                                       delete docSchema[fieldName]["types"][dataType]["structure"]["types"];
-                                               } else {
-                                                       mostFrequentType(docSchema[fieldName]["types"][dataType], processed);
-                                               }
-                                               docSchema[fieldName]["structure"] = docSchema[fieldName]["types"][dataType]["structure"];
-                                       }
+						if(Object.keys(docSchema[fieldName]["types"][dataType]["structure"]["types"])[0] == "Object") {
+							mostFrequentType(docSchema[fieldName]["types"][dataType]["structure"]["types"]["Object"]["structure"], processed);
+							docSchema[fieldName]["types"][dataType]["structure"]["type"] = "Object";
+							docSchema[fieldName]["types"][dataType]["structure"]["structure"] = docSchema[fieldName]["types"][dataType]["structure"]["types"]["Object"]["structure"];
+							delete docSchema[fieldName]["types"][dataType]["structure"]["types"];
+						} else {
+							mostFrequentType(docSchema[fieldName]["types"][dataType], processed);
+						}
+						docSchema[fieldName]["structure"] = docSchema[fieldName]["types"][dataType]["structure"];
+					}
 
 					delete docSchema[fieldName]["types"];
 
@@ -140,12 +154,12 @@ var getSchema = function(url, opts) {
 	};
 
 	if(opts.collectionList != null) {
-               for(var i = collectionInfos.length - 1; i >= 0; i--) {
-                       if(opts.collectionList.indexOf(collectionInfos[i].name) == -1) {
-                               collectionInfos.splice(i, 1);
-                       }
-               }
-       }
+		for(var i = collectionInfos.length - 1; i >= 0; i--) {
+			if(opts.collectionList.indexOf(collectionInfos[i].name) == -1) {
+				collectionInfos.splice(i, 1);
+			}
+		}
+	}
 
 	collectionInfos.map(function(collectionInfo, index) {
 		var collectionData = {};
@@ -198,7 +212,7 @@ var extractMongoSchema = function(url, opts, cb) {
 
 
 if(typeof module != "undefined" && module.exports) {
-  module.exports.extractMongoSchema = extractMongoSchema;
+	module.exports.extractMongoSchema = extractMongoSchema;
 } else {
 	this.extractMongoSchema = extractMongoSchema;
 }
