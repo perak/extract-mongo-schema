@@ -18,10 +18,10 @@ Usage:
 		-o, --output			Output file
 		-f, --format			Output file format. Can be "json" or "html-diagram". Default is "json".
 		-c, --collection		Comma separated list of collections to analyze. Example: "collection1,collection2".
-		-a, --array				Comma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".
-		-r, --raw				Shows the exact list of types with frequency instead of the most frequent type only.
-		-l, --limit				Number of records to parse to get the schema, default is 100.
-		-n, --dont-follow-fk	Don't follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).
+		-a, --array			Comma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".
+		-r, --raw		Shows the exact list of types with frequency instead of the most frequent type only.
+		-l, --limit			Number of records to parse to get the schema, default is 100.
+		-n, --dont-follow-fk		Don't follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).
 
 ```
 
