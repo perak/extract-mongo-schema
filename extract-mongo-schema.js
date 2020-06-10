@@ -17,16 +17,11 @@ const getSchema = async (url, opts) => {
   const schema = {};
   const collections = {};
   const relations = {};
-  let requests = 0;
-  let cached = 0;
 
   const findRelatedCollection = async (value, field) => {
     const valueToString = value.toString();
-    console.log('cached', cached);
-    console.log('requests', requests);
     if (relations[valueToString]) {
       for (const collectionName in collections) {
-        cached++;
         if (relations[valueToString].collectionName === collectionName) {
           delete field.key;
           field.foreignKey = true;
@@ -39,7 +34,6 @@ const getSchema = async (url, opts) => {
     }
     for (const collectionName in collections) {
       const related = await collections[collectionName].collection.findOne({ _id: ObjectId(valueToString) }, { projection: { _id: 1 } });
-      requests++;
       if (related) {
         delete field.key;
         field.foreignKey = true;
