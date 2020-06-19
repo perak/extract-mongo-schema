@@ -126,9 +126,15 @@ const opts = {
   try {
     let schema;
     if (args.inputJson) {
+      // read input json
       const inputJsonPath = path.join(__dirname, args.inputJson)
-      const inputJsonString = fs.readFileSync(inputJsonPath, 'utf8')
-      schema = JSON.parse(inputJsonString)
+      try {
+        const inputJsonString = fs.readFileSync(inputJsonPath, 'utf8')
+        schema = JSON.parse(inputJsonString)
+      } catch (e) {
+        console.log(`Error: cannot read input json file "${inputJsonPath}". ${e.message}`);
+        process.exit(1);
+      }
     }
     else {
       schema = await extractMongoSchema.extractMongoSchema(args.database, opts);
