@@ -20,6 +20,9 @@ const optionDefinitions = [
   {
     name: 'dont-follow-fk', alias: 'n', multiple: true, type: String,
   },
+  {
+    name: 'include-system', alias: 's', type: Boolean, defaultValue: false,
+  },
 ];
 
 const args = commandLineArgs(optionDefinitions);
@@ -39,6 +42,7 @@ const printUsage = function () {
   console.log('\t\t-r, --raw\tShows the exact list of types with frequency instead of the most frequent type only.');
   console.log('\t\t-l, --limit\tChanges the amount of items to parse from the collections. Default is 100.');
   console.log("\t\t-n, --dont-follow-fk string\tDon't follow specified foreign key. Can be simply \"fieldName\" (all collections) or \"collectionName:fieldName\" (only for given collection).");
+  console.log("\t\t-n, --include-system string\tAnalyzes system collections as well.");
   console.log('');
   console.log('Enjoy! :)');
   console.log('');
@@ -110,6 +114,7 @@ const opts = {
   raw: args.raw,
   limit: args.limit,
   dontFollowFK,
+  includeSystem: args['include-system'],
 };
 
 (async () => {

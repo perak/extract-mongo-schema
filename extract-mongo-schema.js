@@ -190,6 +190,14 @@ const getSchema = async (url, opts) => {
     }
   }
 
+  if (!opts.includeSystem) {
+    for (let i = collectionInfos.length - 1; i >= 0; i--) {
+      if (collectionInfos[i].name.startsWith('system.')) {
+        collectionInfos.splice(i, 1);
+      }
+    }
+  }
+
   await Promise.all(collectionInfos.map(async (collectionInfo, index) => {
     collections[collectionInfo.name] = {};
     schema[collectionInfo.name] = {};
