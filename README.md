@@ -23,6 +23,7 @@ Usage:
 		-r, --raw			Shows the exact list of types with frequency instead of the most frequent type only.
 		-l, --limit			Number of records to parse to get the schema, default is 100.
 		-n, --dont-follow-fk		Don't follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).
+		-s, --include-system string	Analyzes system collections as well.
 
 ```
 
