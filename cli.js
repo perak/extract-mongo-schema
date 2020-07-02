@@ -7,6 +7,7 @@ const extractMongoSchema = require('./extract-mongo-schema');
 
 const optionDefinitions = [
   { name: 'database', alias: 'd', type: String },
+  { name: 'inputJson', alias: 'i', type: String },
   { name: 'output', alias: 'o', type: String },
   { name: 'format', alias: 'f', type: String },
   { name: 'collection', alias: 'c', type: String },
@@ -37,6 +38,7 @@ const printUsage = function () {
   console.log('\t\t-d, --database string\tDatabase connection string. Example: "mongodb://localhost:3001/meteor".');
   console.log('\t\t-o, --output string\tOutput file');
   console.log('\t\t-f, --format string\tOutput file format. Can be "json" or "html-diagram".');
+  console.log('\t\t-i, --inputJson string\tInput JSON file, to be used instead of --database. NOTE: this will ignore the remainder of input params and use a previously generated JSON file to generate the diagram.');
   console.log('\t\t-c, --collection\tComma separated list of collections to analyze. Example: "collection1,collection2".');
   console.log('\t\t-a, --array\tComma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".');
   console.log('\t\t-r, --raw\tShows the exact list of types with frequency instead of the most frequent type only.');
@@ -48,9 +50,16 @@ const printUsage = function () {
   console.log('');
 };
 
-if (!args.database) {
+if (args.database && args.inputJson) {
   console.log('');
-  console.log('Database connection string is missing.');
+  console.log('Cannot provide both database connection string and input JSON path.');
+  printUsage();
+  process.exit(1);
+}
+
+if (!args.database && !args.inputJson) {
+  console.log('');
+  console.log('Database connection string or input JSON path is missing.');
   printUsage();
   process.exit(1);
 }
@@ -117,9 +126,25 @@ const opts = {
   includeSystem: args['include-system'],
 };
 
+  
 (async () => {
   try {
-    const schema = await extractMongoSchema.extractMongoSchema(args.database, opts);
+    let schema;
+    if (args.inputJson) {
+      // read input json
+      const inputJsonPath = path.join(__dirname, args.inputJson)
+      try {
+        const inputJsonString = fs.readFileSync(inputJsonPath, 'utf8')
+        schema = JSON.parse(inputJsonString)
+      } catch (e) {
+        console.log(`Error: cannot read input json file "${inputJsonPath}". ${e.message}`);
+        process.exit(1);
+      }
+    }
+    else {
+      schema = await extractMongoSchema.extractMongoSchema(args.database, opts);
+    }
+    
     if (outputFormat === 'json') {
       try {
         fs.writeFileSync(args.output, JSON.stringify(schema, null, '\t'), 'utf8');
@@ -158,3 +183,6 @@ const opts = {
     process.exit(1);
   }
 })();
+
+
+
