@@ -14,6 +14,7 @@ npm -g install extract-mongo-schema
 
 Usage:
 	extract-mongo-schema -d connection_string -o schema.json -f json
+		-u, --authSource		Database for authentication. Example: "admin".
 		-d, --database			Database connection string. Example: "mongodb://localhost:3001/meteor".
 		-o, --output			Output file
 		-f, --format			Output file format. Can be "json" or "html-diagram". Default is "json".

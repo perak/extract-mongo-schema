@@ -1,7 +1,7 @@
 const { MongoClient, ObjectId } = require('mongodb');
 
-const connect = async connectionURL => new Promise((resolve, reject) => {
-  const client = new MongoClient(connectionURL, { useNewUrlParser: true, useUnifiedTopology: true });
+const connect = async (connectionURL, authSource) => new Promise((resolve, reject) => {
+  const client = new MongoClient(connectionURL, { authSource, useNewUrlParser: true, useUnifiedTopology: true });
   client.connect((err) => {
     if (err) throw err;
     const db = client.db();
@@ -10,7 +10,8 @@ const connect = async connectionURL => new Promise((resolve, reject) => {
 });
 
 const getSchema = async (url, opts) => {
-  const { client, db } = await connect(url);
+  console.log(opts);
+  const { client, db } = await connect(url, opts.authSource);
 
   const l = await db.listCollections();
   const collectionInfos = await l.toArray();
