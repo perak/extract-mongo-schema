@@ -16,7 +16,7 @@ Usage:
 	extract-mongo-schema -d connection_string -o schema.json -f json
 		-d, --database			Database connection string. Example: "mongodb://localhost:3001/meteor".
 		-o, --output			Output file
-		-f, --format			Output file format. Can be "json" or "html-diagram". Default is "json".
+		-f, --format			Output file format. Can be "json", "html-diagram" or "xlsx". Default is "json".
 		-i, --inputJson 		Input JSON file, to be used instead of --database. NOTE: this will ignore the remainder of input params and use a previously generated JSON file to generate the diagram.
 		-c, --collection		Comma separated list of collections to analyze. Example: "collection1,collection2".
 		-a, --array			Comma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".
