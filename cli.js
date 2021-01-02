@@ -177,7 +177,6 @@ const opts = {
       }
     }
     if(outputFormat == "xlsx"){
-      console.log(args.output);
       if(!args.output.endsWith(".xlsx")){
         console.log("Wrong output format [xlsx]");
         process.exit(1);
