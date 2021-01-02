@@ -4,6 +4,7 @@ const commandLineArgs = require('command-line-args');
 const fs = require('fs');
 const path = require('path');
 const extractMongoSchema = require('./extract-mongo-schema');
+const xlsx = require("xlsx");
 
 const optionDefinitions = [
   { name: 'database', alias: 'd', type: String },
@@ -37,7 +38,7 @@ const printUsage = function () {
   console.log('\textract-mongo-schema -d connection_string -o schema.json');
   console.log('\t\t-d, --database string\tDatabase connection string. Example: "mongodb://localhost:3001/meteor".');
   console.log('\t\t-o, --output string\tOutput file');
-  console.log('\t\t-f, --format string\tOutput file format. Can be "json" or "html-diagram".');
+  console.log('\t\t-f, --format string\tOutput file format. Can be "json", "html-diagram" or "xlsx".');
   console.log('\t\t-i, --inputJson string\tInput JSON file, to be used instead of --database. NOTE: this will ignore the remainder of input params and use a previously generated JSON file to generate the diagram.');
   console.log('\t\t-c, --collection\tComma separated list of collections to analyze. Example: "collection1,collection2".');
   console.log('\t\t-a, --array\tComma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".');
@@ -174,6 +175,47 @@ const opts = {
         console.log(`Error: cannot write output "${args.output}". ${e.message}`);
         process.exit(1);
       }
+    }
+    if(outputFormat == "xlsx"){
+      console.log(args.output);
+      if(!args.output.endsWith(".xlsx")){
+        console.log("Wrong output format [xlsx]");
+        process.exit(1);
+      }
+      //get all collections
+      var collections = Object.keys(schema);
+      var wb = xlsx.utils.book_new();
+      //one worksheet per collection
+      collections.forEach(element => {
+        var wsName = element;
+
+        // console.log(element);
+        var wsData = [["Collection", "primaryKey", "type", "structure", "require"]];
+        var items = Object.keys(schema[element]);//items in collection        
+        items.forEach( item => {                  
+          var props = Object.keys(schema[element][item]);           
+          var itemProperties = {          
+            primaryKey: schema[element][item]["primaryKey"] != "undefined" ? schema[element][item]["primaryKey"] == "undefined" : false,
+            type: schema[element][item]["type"] != "undefined" ? schema[element][item]["type"] : "undefined",
+            structure: schema[element][item]["structure"] != "undefined" ? schema[element][item]["structure"] : "undefined",
+            require: schema[element][item]["required"] != "undefined" ? schema[element][item]["required"] : "undefined"
+          };           
+          if(itemProperties.type != "undefined" && itemProperties.type == "Object"){
+            itemProperties.structure = JSON.stringify(itemProperties.structure);
+          }
+          var data = [];
+          data.push(item);
+          data.push(itemProperties.primaryKey);
+          data.push(itemProperties.type);
+          data.push(itemProperties.structure);
+          data.push(itemProperties.require);          
+          wsData.push(data);        
+        });
+        // console.log(wsData);
+        var ws = xlsx.utils.aoa_to_sheet(wsData);
+        xlsx.utils.book_append_sheet(wb, ws, wsName);
+      });
+      xlsx.writeFile(wb, args.output);
     }
 
     console.log('Success.');
