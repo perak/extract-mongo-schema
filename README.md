@@ -42,6 +42,12 @@ extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.json
 extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.html -f html-diagram
 ```
 
+**Extract schema into xlsx**
+
+```
+extract-mongo-schema -d "mongodb://localhost:3001/meteor" -o schema.xlsx -f xlsx
+```
+
 **Convert json to html**
 
 ```
