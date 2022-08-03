@@ -7,6 +7,7 @@ const extractMongoSchema = require('./extract-mongo-schema');
 
 const optionDefinitions = [
   { name: 'database', alias: 'd', type: String },
+  { name: 'authSource', alias: 'u', type: String },
   { name: 'inputJson', alias: 'i', type: String },
   { name: 'output', alias: 'o', type: String },
   { name: 'format', alias: 'f', type: String },
@@ -35,6 +36,7 @@ const printUsage = function () {
   console.log('');
   console.log('Usage:');
   console.log('\textract-mongo-schema -d connection_string -o schema.json');
+  console.log('\t\t-u, --authSource string\tDatabase for authentication. Example: "admin".');
   console.log('\t\t-d, --database string\tDatabase connection string. Example: "mongodb://localhost:3001/meteor".');
   console.log('\t\t-o, --output string\tOutput file');
   console.log('\t\t-f, --format string\tOutput file format. Can be "json" or "html-diagram".');
@@ -43,8 +45,8 @@ const printUsage = function () {
   console.log('\t\t-a, --array\tComma separated list of types of arrays to analyze. Example: "Uint8Array,ArrayBuffer,Array".');
   console.log('\t\t-r, --raw\tShows the exact list of types with frequency instead of the most frequent type only.');
   console.log('\t\t-l, --limit\tChanges the amount of items to parse from the collections. Default is 100.');
-  console.log("\t\t-n, --dont-follow-fk string\tDon't follow specified foreign key. Can be simply \"fieldName\" (all collections) or \"collectionName:fieldName\" (only for given collection).");
-  console.log("\t\t-s, --include-system string\tAnalyzes system collections as well.");
+  console.log('\t\t-n, --dont-follow-fk string\tDon\'t follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).');
+  console.log('\t\t-s, --include-system string\tAnalyzes system collections as well.');
   console.log('');
   console.log('Enjoy! :)');
   console.log('');
@@ -118,6 +120,7 @@ console.log('');
 console.log('Extracting...');
 
 const opts = {
+  authSource: args.authSource,
   collectionList,
   arrayList,
   raw: args.raw,
@@ -126,7 +129,7 @@ const opts = {
   includeSystem: args['include-system'],
 };
 
-  
+
 (async () => {
   try {
     let schema;
@@ -144,7 +147,7 @@ const opts = {
     else {
       schema = await extractMongoSchema.extractMongoSchema(args.database, opts);
     }
-    
+
     if (outputFormat === 'json') {
       try {
         fs.writeFileSync(args.output, JSON.stringify(schema, null, '\t'), 'utf8');
