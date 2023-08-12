@@ -59,6 +59,8 @@ const getSchema = async (url, opts) => {
 
   const getDocSchema = async (collectionName, doc, docSchema) => {
     for (const key in doc) {
+        if(opts.excludeFields.includes(key)) continue;
+
       if (!docSchema[key]) {
         docSchema[key] = { types: {} };
       }
