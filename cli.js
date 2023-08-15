@@ -26,6 +26,9 @@ const optionDefinitions = [
   {
     name: 'include-system', alias: 's', type: Boolean, defaultValue: false,
   },
+  {
+    name: 'exclude-field', alias: 'e', type: String
+  },
 ];
 
 const args = commandLineArgs(optionDefinitions);
@@ -48,6 +51,7 @@ const printUsage = function () {
   console.log('\t\t-l, --limit\tChanges the amount of items to parse from the collections. Default is 100.');
   console.log('\t\t-n, --dont-follow-fk string\tDon\'t follow specified foreign key. Can be simply "fieldName" (all collections) or "collectionName:fieldName" (only for given collection).');
   console.log('\t\t-s, --include-system string\tAnalyzes system collections as well.');
+  console.log('\t\t-e, --exclude-field string\tExcludes a field from being included in the output schema. Example: -e "_id".');
   console.log('');
   console.log('Enjoy! :)');
   console.log('');
@@ -93,6 +97,11 @@ if (args.array) {
   arrayList = args.array.split(',');
 }
 
+let fieldExclusionList = [];
+if(args["exclude-field"]) {
+    fieldExclusionList = args["exclude-field"].split(',');
+}
+
 const outputFormat = args.format || 'json';
 
 const dontFollowTMP = args['dont-follow-fk'] || [];
@@ -130,6 +139,7 @@ const opts = {
   limit: args.limit,
   dontFollowFK,
   includeSystem: args['include-system'],
+  excludeFields: fieldExclusionList
 };
 
 
