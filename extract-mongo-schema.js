@@ -10,7 +10,7 @@ const connect = async (connectionURL, authSource) => new Promise((resolve, rejec
 });
 
 const getSchema = async (url, opts) => {
-  console.log(opts);
+  //console.log(opts);
   const { client, db } = await connect(url, opts.authSource);
 
   const l = await db.listCollections();

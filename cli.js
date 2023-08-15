@@ -29,17 +29,17 @@ const optionDefinitions = [
 ];
 
 const args = commandLineArgs(optionDefinitions);
-
-console.log('');
-console.log('Extract schema from Mongo database (including foreign keys)');
-
+if(args.output !== "-") {
+    console.log('');
+    console.log('Extract schema from Mongo database (including foreign keys)');
+}
 const printUsage = function () {
   console.log('');
   console.log('Usage:');
   console.log('\textract-mongo-schema -d connection_string -o schema.json');
   console.log('\t\t-u, --authSource string\tDatabase for authentication. Example: "admin".');
   console.log('\t\t-d, --database string\tDatabase connection string. Example: "mongodb://localhost:3001/meteor".');
-  console.log('\t\t-o, --output string\tOutput file');
+  console.log('\t\t-o, --output string\tOutput file Use - to output to STDOUT');
   console.log('\t\t-f, --format string\tOutput file format. Can be "json", "html-diagram" or "xlsx".');
   console.log('\t\t-i, --inputJson string\tInput JSON file, to be used instead of --database. NOTE: this will ignore the remainder of input params and use a previously generated JSON file to generate the diagram.');
   console.log('\t\t-c, --collection\tComma separated list of collections to analyze. Example: "collection1,collection2".');
@@ -117,8 +117,10 @@ dontFollowTMP.map((df) => {
   dontFollowFK[collection][field] = true;
 });
 
-console.log('');
-console.log('Extracting...');
+if(args.output !== "-") {
+    console.log('');
+    console.log('Extracting...');
+}
 
 const opts = {
   authSource: args.authSource,
@@ -151,7 +153,10 @@ const opts = {
 
     if (outputFormat === 'json') {
       try {
-        fs.writeFileSync(args.output, JSON.stringify(schema, null, '\t'), 'utf8');
+        if(args.output === "-")
+            console.log(JSON.stringify(schema, null, '\t'));
+        else
+            fs.writeFileSync(args.output, JSON.stringify(schema, null, '\t'), 'utf8');
       } catch (e) {
         console.log(`Error: cannot write output "${args.output}". ${e.message}`);
         process.exit(1);
@@ -219,9 +224,10 @@ const opts = {
       });
       xlsx.writeFile(wb, args.output);
     }
-
-    console.log('Success.');
-    console.log('');
+    if(args.output !== "-") {
+        console.log('Success.');
+        console.log('');
+    }
   } catch (err) {
     console.log(err);
     process.exit(1);
